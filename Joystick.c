@@ -20,7 +20,8 @@ these buttons for our use.
 
 #include "Joystick.h"
 
-typedef enum {
+typedef enum
+{
 	UP,
 	DOWN,
 	LEFT,
@@ -37,54 +38,106 @@ typedef enum {
 	NOTHING
 } Buttons_t;
 
-typedef struct {
+typedef struct
+{
 	Buttons_t button;
 	uint16_t duration;
-} command; 
+} command;
 
-static const command step[] = {
+static const command seqMain[] = {
 	// Setup controller
-	{ TRIGGERS,   5 },
-	{ NOTHING,  50 },
-	{ TRIGGERS,   5 },
-	{ NOTHING,  50 },
-	{ A,          5 },
-	{ NOTHING,  250 },
+	{TRIGGERS, 5},
+	{NOTHING, 50},
+	{TRIGGERS, 5},
+	{NOTHING, 50},
+	{A, 5},
+	{NOTHING, 250},
 
 	// Spam ZR
-	{ UP,		5 },
-	{ NOTHING,	5 },
+	{UP, 5},
+	{NOTHING, 5},
 
-	{ LEFT,		5 },
-	{ NOTHING,	5 },
-	{ ZR,		5 },
-	{ NOTHING,	5 },
-	{ ZR,		5 },
-	{ NOTHING,	5 },
-	{ ZR,		5 },
-	{ NOTHING,	5 },
-	{ ZR,		5 },
-	{ NOTHING,	5 },
-	{ ZR,		5 },
-	{ NOTHING,	5 },
+	{LEFT, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
 
-	{ RIGHT,	5 },
-	{ NOTHING,	5 },
-	{ ZR,		5 },
-	{ NOTHING,	5 },
-	{ ZR,		5 },
-	{ NOTHING,	5 },
-	{ ZR,		5 },
-	{ NOTHING,	5 },
-	{ ZR,		5 },
-	{ NOTHING,	5 },
-	{ ZR,		5 },
-	{ NOTHING,	5 }
-	
-};
+	{RIGHT, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5},
+	{ZR, 5},
+	{NOTHING, 5}};
+
+static const command seqEat[] = {
+	// Setup controller
+	{R, 5},
+	{NOTHING, 5},
+	{ZL, 80},
+	{NOTHING, 5},
+
+	{L, 5},
+	{NOTHING, 5},
+	{ZL, 80},
+	{NOTHING, 5}};
 
 // Main entry point.
-int main(void) {
+int main(void)
+{
 	// We'll start by performing hardware and peripheral setup.
 	SetupHardware();
 	// We'll then enable global interrupts for our use.
@@ -100,7 +153,8 @@ int main(void) {
 }
 
 // Configures hardware and peripherals, such as the USB peripherals.
-void SetupHardware(void) {
+void SetupHardware(void)
+{
 	// We need to disable watchdog if enabled by bootloader/fuses.
 	MCUSR &= ~(1 << WDRF);
 	wdt_disable();
@@ -109,32 +163,35 @@ void SetupHardware(void) {
 	clock_prescale_set(clock_div_1);
 	// We can then initialize our hardware and peripherals, including the USB stack.
 
-	#ifdef ALERT_WHEN_DONE
-	// Both PORTD and PORTB will be used for the optional LED flashing and buzzer.
-	#warning LED and Buzzer functionality enabled. All pins on both PORTB and \
+#ifdef ALERT_WHEN_DONE
+// Both PORTD and PORTB will be used for the optional LED flashing and buzzer.
+#warning LED and Buzzer functionality enabled. All pins on both PORTB and \
 PORTD will toggle when printing is done.
-	DDRD  = 0xFF; //Teensy uses PORTD
-	PORTD =  0x0;
-                  //We'll just flash all pins on both ports since the UNO R3
-	DDRB  = 0xFF; //uses PORTB. Micro can use either or, but both give us 2 LEDs
-	PORTB =  0x0; //The ATmega328P on the UNO will be resetting, so unplug it?
-	#endif
+	DDRD = 0xFF; //Teensy uses PORTD
+	PORTD = 0x0;
+	//We'll just flash all pins on both ports since the UNO R3
+	DDRB = 0xFF; //uses PORTB. Micro can use either or, but both give us 2 LEDs
+	PORTB = 0x0; //The ATmega328P on the UNO will be resetting, so unplug it?
+#endif
 	// The USB stack should be initialized last.
 	USB_Init();
 }
 
 // Fired to indicate that the device is enumerating.
-void EVENT_USB_Device_Connect(void) {
+void EVENT_USB_Device_Connect(void)
+{
 	// We can indicate that we're enumerating here (via status LEDs, sound, etc.).
 }
 
 // Fired to indicate that the device is no longer connected to a host.
-void EVENT_USB_Device_Disconnect(void) {
+void EVENT_USB_Device_Disconnect(void)
+{
 	// We can indicate that our device is not ready (via status LEDs, sound, etc.).
 }
 
 // Fired when the host set the current configuration of the USB device after enumeration.
-void EVENT_USB_Device_ConfigurationChanged(void) {
+void EVENT_USB_Device_ConfigurationChanged(void)
+{
 	bool ConfigSuccess = true;
 
 	// We setup the HID report endpoints.
@@ -145,14 +202,16 @@ void EVENT_USB_Device_ConfigurationChanged(void) {
 }
 
 // Process control requests sent to the device from the USB host.
-void EVENT_USB_Device_ControlRequest(void) {
+void EVENT_USB_Device_ControlRequest(void)
+{
 	// We can handle two control requests: a GetReport and a SetReport.
 
 	// Not used here, it looks like we don't receive control request from the Switch.
 }
 
 // Process and deliver data from IN and OUT endpoints.
-void HID_Task(void) {
+void HID_Task(void)
+{
 	// If the device isn't connected and properly configured, we can't do anything here.
 	if (USB_DeviceState != DEVICE_STATE_Configured)
 		return;
@@ -168,7 +227,8 @@ void HID_Task(void) {
 			// We'll create a place to store our data received from the host.
 			USB_JoystickReport_Output_t JoystickOutputData;
 			// We'll then take in that data, setting it up in our storage.
-			while(Endpoint_Read_Stream_LE(&JoystickOutputData, sizeof(JoystickOutputData), NULL) != ENDPOINT_RWSTREAM_NoError);
+			while (Endpoint_Read_Stream_LE(&JoystickOutputData, sizeof(JoystickOutputData), NULL) != ENDPOINT_RWSTREAM_NoError)
+				;
 			// At this point, we can react to this data.
 
 			// However, since we're not doing anything with this data, we abandon it.
@@ -187,13 +247,15 @@ void HID_Task(void) {
 		// We'll then populate this report with what we want to send to the host.
 		GetNextReport(&JoystickInputData);
 		// Once populated, we can output this data to the host. We do this by first writing the data to the control stream.
-		while(Endpoint_Write_Stream_LE(&JoystickInputData, sizeof(JoystickInputData), NULL) != ENDPOINT_RWSTREAM_NoError);
+		while (Endpoint_Write_Stream_LE(&JoystickInputData, sizeof(JoystickInputData), NULL) != ENDPOINT_RWSTREAM_NoError)
+			;
 		// We then send an IN packet on this endpoint.
 		Endpoint_ClearIN();
 	}
 }
 
-typedef enum {
+typedef enum
+{
 	SYNC_CONTROLLER,
 	SYNC_POSITION,
 	BREATHE,
@@ -207,15 +269,15 @@ State_t state = SYNC_CONTROLLER;
 int echoes = 0;
 USB_JoystickReport_Input_t last_report;
 
-int report_count = 0;
-int xpos = 0;
-int ypos = 0;
-int bufindex = 0;
-int duration_count = 0;
-int portsval = 0;
+int stepIndex0 = 0;
+int loopCount0 = 0;
+int stepIndex1 = 0;
+int durationCount = 0;
+int portsVal = 0;
 
 // Prepare the next report for the host.
-void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
+void GetNextReport(USB_JoystickReport_Input_t *const ReportData)
+{
 
 	// Prepare an empty report
 	memset(ReportData, 0, sizeof(USB_JoystickReport_Input_t));
@@ -237,9 +299,9 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 	switch (state)
 	{
 
-		case SYNC_CONTROLLER:
-			state = BREATHE;
-			break;
+	case SYNC_CONTROLLER:
+		state = BREATHE;
+		break;
 
 		// case SYNC_CONTROLLER:
 		// 	if (report_count > 550)
@@ -267,97 +329,100 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 		// 	report_count++;
 		// 	break;
 
-		case SYNC_POSITION:
-			bufindex = 0;
+	case SYNC_POSITION:
+		stepIndex0 = 0;
 
+		ReportData->Button = 0;
+		ReportData->LX = STICK_CENTER;
+		ReportData->LY = STICK_CENTER;
+		ReportData->RX = STICK_CENTER;
+		ReportData->RY = STICK_CENTER;
+		ReportData->HAT = HAT_CENTER;
 
-			ReportData->Button = 0;
-			ReportData->LX = STICK_CENTER;
-			ReportData->LY = STICK_CENTER;
-			ReportData->RX = STICK_CENTER;
-			ReportData->RY = STICK_CENTER;
-			ReportData->HAT = HAT_CENTER;
+		state = BREATHE;
+		break;
 
+	case BREATHE:
+		state = PROCESS;
+		break;
 
-			state = BREATHE;
-			break;
-
-		case BREATHE:
-			state = PROCESS;
-			break;
-
-		case PROCESS:
-
-			switch (step[bufindex].button)
+	case PROCESS:
+		// Main steps
+		if (loopCount0 <= 10)
+		{
+			switch (seqMain[stepIndex0].button)
 			{
 
-				case UP:
-					ReportData->LY = STICK_MIN;				
-					break;
+			case UP:
+				ReportData->LY = STICK_MIN;
+				break;
 
-				case LEFT:
-					ReportData->LX = STICK_MIN;				
-					break;
+			case LEFT:
+				ReportData->LX = STICK_MIN;
+				break;
 
-				case DOWN:
-					ReportData->LY = STICK_MAX;				
-					break;
+			case DOWN:
+				ReportData->LY = STICK_MAX;
+				break;
 
-				case RIGHT:
-					ReportData->LX = STICK_MAX;				
-					break;
+			case RIGHT:
+				ReportData->LX = STICK_MAX;
+				break;
 
-				case A:
-					ReportData->Button |= SWITCH_A;
-					break;
+			case A:
+				ReportData->Button |= SWITCH_A;
+				break;
 
-				case B:
-					ReportData->Button |= SWITCH_B;
-					break;
+			case B:
+				ReportData->Button |= SWITCH_B;
+				break;
 
-				case L:
-					ReportData->Button |= SWITCH_L;
-					break;
+			case L:
+				ReportData->Button |= SWITCH_L;
+				break;
 
-				case R:
-					ReportData->Button |= SWITCH_R;
-					break;
+			case R:
+				ReportData->Button |= SWITCH_R;
+				break;
 
-				case ZL:
-					ReportData->Button |= SWITCH_ZL;
-					break;
+			case ZL:
+				ReportData->Button |= SWITCH_ZL;
+				break;
 
-				case ZR:
-					ReportData->Button |= SWITCH_ZR;
-					break;
+			case ZR:
+				ReportData->Button |= SWITCH_ZR;
+				break;
 
-				case TRIGGERS:
-					ReportData->Button |= SWITCH_L | SWITCH_R;
-					break;
+			case TRIGGERS:
+				ReportData->Button |= SWITCH_L | SWITCH_R;
+				break;
 
-				default:
-					ReportData->LX = STICK_CENTER;
-					ReportData->LY = STICK_CENTER;
-					ReportData->RX = STICK_CENTER;
-					ReportData->RY = STICK_CENTER;
-					ReportData->HAT = HAT_CENTER;
-					break;
+			default:
+				ReportData->LX = STICK_CENTER;
+				ReportData->LY = STICK_CENTER;
+				ReportData->RX = STICK_CENTER;
+				ReportData->RY = STICK_CENTER;
+				ReportData->HAT = HAT_CENTER;
+				break;
 			}
 
-			duration_count++;
+			durationCount++;
 
-			if (duration_count > step[bufindex].duration)
+			if (durationCount > seqMain[stepIndex0].duration)
 			{
-				bufindex++;
-				duration_count = 0;				
+				stepIndex0++;
+				durationCount = 0;
 			}
 
 			// LOOP FINISHED
-			if (bufindex > (int)( sizeof(step) / sizeof(step[0])) - 1)
+			if (stepIndex0 > (int)(sizeof(seqMain) / sizeof(seqMain[0])) - 1)
 			{
-				// RESTART AT 7 - SKIP CONTROLLER SETUP
-				bufindex = 6;
-				duration_count = 0;
+				// RESTART AT 7 (INDEX STARTS AT 0) - SKIP CONTROLLER SETUP
+				stepIndex0 = 6;
+				durationCount = 0;
+
+				// INCREMENT LOOP COUNT
+				loopCount0++;
 
 				state = BREATHE;
 
@@ -367,21 +432,108 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				ReportData->RY = STICK_CENTER;
 				ReportData->HAT = HAT_CENTER;
 			}
+		}
 
-			break;
+		// Only fire off every XYZ loop
+		if (loopCount0 > 10)
+		{
+			switch (seqEat[stepIndex1].button)
+			{
 
-		case CLEANUP:
-			state = DONE;
-			break;
+			case UP:
+				ReportData->LY = STICK_MIN;
+				break;
 
-		case DONE:
-			#ifdef ALERT_WHEN_DONE
-			portsval = ~portsval;
-			PORTD = portsval; //flash LED(s) and sound buzzer if attached
-			PORTB = portsval;
-			_delay_ms(250);
-			#endif
-			return;
+			case LEFT:
+				ReportData->LX = STICK_MIN;
+				break;
+
+			case DOWN:
+				ReportData->LY = STICK_MAX;
+				break;
+
+			case RIGHT:
+				ReportData->LX = STICK_MAX;
+				break;
+
+			case A:
+				ReportData->Button |= SWITCH_A;
+				break;
+
+			case B:
+				ReportData->Button |= SWITCH_B;
+				break;
+
+			case L:
+				ReportData->Button |= SWITCH_L;
+				break;
+
+			case R:
+				ReportData->Button |= SWITCH_R;
+				break;
+
+			case ZL:
+				ReportData->Button |= SWITCH_ZL;
+				break;
+
+			case ZR:
+				ReportData->Button |= SWITCH_ZR;
+				break;
+
+			case TRIGGERS:
+				ReportData->Button |= SWITCH_L | SWITCH_R;
+				break;
+
+			default:
+				ReportData->LX = STICK_CENTER;
+				ReportData->LY = STICK_CENTER;
+				ReportData->RX = STICK_CENTER;
+				ReportData->RY = STICK_CENTER;
+				ReportData->HAT = HAT_CENTER;
+				break;
+			}
+
+			durationCount++;
+
+			if (durationCount > seqEat[stepIndex1].duration)
+			{
+				stepIndex1++;
+				durationCount = 0;
+			}
+
+			// LOOP FINISHED
+			if (stepIndex1 > (int)(sizeof(seqEat) / sizeof(seqEat[0])) - 1)
+			{
+				stepIndex1 = 0;
+				durationCount = 0;
+
+				// RESET LOOP COUNT
+				loopCount0 = 0;
+
+				state = BREATHE;
+
+				ReportData->LX = STICK_CENTER;
+				ReportData->LY = STICK_CENTER;
+				ReportData->RX = STICK_CENTER;
+				ReportData->RY = STICK_CENTER;
+				ReportData->HAT = HAT_CENTER;
+			}
+		}
+
+		break;
+
+	case CLEANUP:
+		state = DONE;
+		break;
+
+	case DONE:
+#ifdef ALERT_WHEN_DONE
+		portsVal = ~portsVal;
+		PORTD = portsVal; //flash LED(s) and sound buzzer if attached
+		PORTB = portsVal;
+		_delay_ms(250);
+#endif
+		return;
 	}
 
 	// // Inking
@@ -392,5 +544,4 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 	// Prepare to echo this report
 	memcpy(&last_report, ReportData, sizeof(USB_JoystickReport_Input_t));
 	echoes = ECHOES;
-
 }
