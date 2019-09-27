@@ -121,19 +121,21 @@ static const command seqMain[] = {
 	{ZR, 5},
 	{NOTHING, 5},
 	{ZR, 5},
-	{NOTHING, 5}};
+	{NOTHING, 5}
+};
 
 static const command seqEat[] = {
 	// Setup controller
-	{R, 5},
+	{L, 5},
 	{NOTHING, 5},
 	{ZL, 80},
 	{NOTHING, 5},
 
-	{L, 5},
+	{R, 5},
 	{NOTHING, 5},
 	{ZL, 80},
-	{NOTHING, 5}};
+	{NOTHING, 5}
+};
 
 // Main entry point.
 int main(void)
@@ -348,7 +350,7 @@ void GetNextReport(USB_JoystickReport_Input_t *const ReportData)
 
 	case PROCESS:
 		// Main steps
-		if (loopCount0 <= 10)
+		if (loopCount0 <= 20)
 		{
 			switch (seqMain[stepIndex0].button)
 			{
@@ -398,6 +400,7 @@ void GetNextReport(USB_JoystickReport_Input_t *const ReportData)
 				break;
 
 			default:
+				ReportData->Button = 0;
 				ReportData->LX = STICK_CENTER;
 				ReportData->LY = STICK_CENTER;
 				ReportData->RX = STICK_CENTER;
@@ -426,6 +429,7 @@ void GetNextReport(USB_JoystickReport_Input_t *const ReportData)
 
 				state = BREATHE;
 
+				ReportData->Button = 0;
 				ReportData->LX = STICK_CENTER;
 				ReportData->LY = STICK_CENTER;
 				ReportData->RX = STICK_CENTER;
@@ -435,7 +439,7 @@ void GetNextReport(USB_JoystickReport_Input_t *const ReportData)
 		}
 
 		// Only fire off every XYZ loop
-		if (loopCount0 > 10)
+		else if (loopCount0 > 20)
 		{
 			switch (seqEat[stepIndex1].button)
 			{
@@ -485,6 +489,7 @@ void GetNextReport(USB_JoystickReport_Input_t *const ReportData)
 				break;
 
 			default:
+				ReportData->Button = 0;
 				ReportData->LX = STICK_CENTER;
 				ReportData->LY = STICK_CENTER;
 				ReportData->RX = STICK_CENTER;
@@ -512,6 +517,7 @@ void GetNextReport(USB_JoystickReport_Input_t *const ReportData)
 
 				state = BREATHE;
 
+				ReportData->Button = 0;
 				ReportData->LX = STICK_CENTER;
 				ReportData->LY = STICK_CENTER;
 				ReportData->RX = STICK_CENTER;
